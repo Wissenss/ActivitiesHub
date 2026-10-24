@@ -19,7 +19,11 @@ public class EventsController : EventsHubBaseController
     [ProducesResponseType(typeof(Event), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Event>> GetEventDetailAsync(string id)
     {
-        return await Mediator.Send(new GetEventDetails.Query { Id = id });
+        var result = await Mediator.Send(new GetEventDetails.Query { Id = id });
+
+        if (result == null) return NotFound("The event was not found");
+
+        return result;
     }
 
     [HttpPost]

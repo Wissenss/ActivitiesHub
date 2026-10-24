@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using EventsHub.Api.Controllers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +14,13 @@ public class EventsControllerTests
     [SetUp]
     public void Setup()
     {
-        _eventsController = new EventsController(GlobalTestSetup.AppDbContext);
+        _eventsController = new EventsController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { RequestServices = GlobalTestSetup.Services }
+            }
+        };
     }
 
     [Test]
@@ -22,7 +29,7 @@ public class EventsControllerTests
         // Arrange
         var expectedCount = await GlobalTestSetup.AppDbContext.Events.CountAsync();
         // Act
-        var result = await _eventsController.GetEventsAsync();
+        var result = await _eventsController.GetEventsAsync(CancellationToken.None);
         // Assert
         Assert.That(result.Value, Is.Not.Null);
         Assert.That(result.Value, Has.Count.EqualTo(expectedCount));
